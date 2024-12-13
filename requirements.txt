@@ -1,5 +1,4 @@
-
-unidecode==2.9
+unidecode==2.9.0
 streamlit
 pandas==2.2.3
 requests==2.32.3
