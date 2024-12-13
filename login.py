@@ -6,9 +6,10 @@ from firebase_admin import auth
 import json
 import requests
 
-# Khởi tạo Firebase chỉ một lần
-cred = credentials.Certificate("E:\\hk7\\5.CMPM\\chay thu\\hotel-43f3e-f759d5da9de7.json")
+# Khởi tạo Firebase chỉ một lần, sử dụng đường dẫn tương đối
+firebase_json_path = "hotel-43f3e-f759d5da9de7.json"  # File JSON phải nằm trong cùng thư mục với mã nguồn
 if not firebase_admin._apps:
+    cred = credentials.Certificate(firebase_json_path)
     firebase_admin.initialize_app(cred)
 
 def main():  
@@ -19,51 +20,45 @@ def main():
     if 'useremail' not in st.session_state:
         st.session_state.useremail = ''
         
-    def sign_up_with_email_and_password(email, password, username=None, return_secure_token=True):
+    def sign_up_with_email_and_password(email, password, username=None):
         try:
             rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
             payload = {
                 "email": email,
                 "password": password,
-                "returnSecureToken": return_secure_token
+                "returnSecureToken": True
             }
             if username:
                 payload["displayName"] = username 
-            payload = json.dumps(payload)
-            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, data=payload)
-            try:                                            
-
-                return r.json()['email']
-            except:
-                st.warning(r.json())
+            
+            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
+            response = r.json()
+            if r.status_code == 200:
+                return response.get('email', 'Unknown email')
+            else:
+                st.warning(f"Signup failed: {response.get('error', {}).get('message', 'Unknown error')}")
         except Exception as e:
-            st.warning(f'Signup failed: {e}')
+            st.error(f"Error during sign-up: {e}")
 
-    def sign_in_with_email_and_password(email=None, password=None, return_secure_token=True):
-        rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-
+    def sign_in_with_email_and_password(email, password):
         try:
+            rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
             payload = {
-                "returnSecureToken": return_secure_token
+                "email": email,
+                "password": password,
+                "returnSecureToken": True
             }
-            if email:
-                payload["email"] = email
-            if password:
-                payload["password"] = password
-            payload = json.dumps(payload)
-            print('payload sigin',payload)
-            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, data=payload)
-            try:
-                data = r.json()
-                user_info = {
-                    'email': data['email'],
-                    'username': data.get('displayName')  # Retrieve username if available
+            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
+            response = r.json()
+            if r.status_code == 200:
+                return {
+                    'email': response['email'],
+                    'username': response.get('displayName', 'Unknown username')
                 }
-                return user_info
-            except:
-                st.warning(data)
+            else:
+                st.warning(f"Signin failed: {response.get('error', {}).get('message', 'Unknown error')}")
         except Exception as e:
-            st.warning(f'Signin failed: {e}')
+            st.error(f"Error during sign-in: {e}")
 
     def reset_password(email):
         try:
@@ -72,46 +67,39 @@ def main():
                 "email": email,
                 "requestType": "PASSWORD_RESET"
             }
-            payload = json.dumps(payload)
-            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, data=payload)
+            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
+            response = r.json()
             if r.status_code == 200:
-                return True, "Reset email Sent"
+                return True, "Password reset email sent successfully."
             else:
-                # Handle error response
-                error_message = r.json().get('error', {}).get('message')
-                return False, error_message
+                error_message = response.get('error', {}).get('message', 'Unknown error')
+                return False, f"Password reset failed: {error_message}"
         except Exception as e:
-            return False, str(e)
+            return False, f"Error during password reset: {e}"
 
-    def f(): 
+    def handle_login():
         try:
             userinfo = sign_in_with_email_and_password(st.session_state.email_input, st.session_state.password_input)
             st.session_state.username = userinfo['username']
             st.session_state.useremail = userinfo['email']
-            
-            global Usernm
-            Usernm = (userinfo['username'])
-            
             st.session_state.signedout = True
             st.session_state.signout = True    
-  
-        except: 
-            st.warning('Login Failed')
+        except Exception as e: 
+            st.warning(f"Login failed: {e}")
 
-    def t():
+    def handle_logout():
         st.session_state.signout = False
         st.session_state.signedout = False   
         st.session_state.username = ''
 
-    def forget():
-        email = st.text_input('Email')
+    def handle_reset_password():
+        email = st.text_input('Enter your email for password reset:')
         if st.button('Send Reset Link'):
-            print(email)
             success, message = reset_password(email)
             if success:
-                st.success("Password reset email sent successfully.")
+                st.success(message)
             else:
-                st.warning(f"Password reset failed: {message}") 
+                st.warning(message)
 
     if "signedout" not in st.session_state:
         st.session_state["signedout"] = False
@@ -129,16 +117,15 @@ def main():
             username = st.text_input("Enter your unique username")
             if st.button('Create my account'):
                 user = sign_up_with_email_and_password(email=email, password=password, username=username)
-                st.success('Account created successfully!')
-                st.markdown('Please Login using your email and password')
-                st.balloons()
+                if user:
+                    st.success('Account created successfully!')
+                    st.markdown('Please Login using your email and password')
+                    st.balloons()
         else:
-            st.button('Login', on_click=f)
-            forget()
+            st.button('Login', on_click=handle_login)
+            handle_reset_password()
 
     if st.session_state.signout:
         st.text('Name: ' + st.session_state.username)
         st.text('Email: ' + st.session_state.useremail)
-        st.button('Sign out', on_click=t)
-
-
+        st.button('Sign out', on_click=handle_logout)
