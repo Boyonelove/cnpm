@@ -1,4 +1,6 @@
-firebase-admin
-pandas
 streamlit
-unidecode
+streamlit-option-menu
+python-dotenv
+requests 2.32.3
+streamlit 1.41.0
+firebase-admin
