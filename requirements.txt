@@ -1,5 +1,8 @@
+
+unidecode==2.9
+streamlit
+pandas==2.2.3
+requests==2.32.3
+firebase-admin==6.6.0
 streamlit-option-menu
 python-dotenv
-requests==2.32.3
-streamlit==1.41.0
-firebase-admin==6.6.0
