@@ -10,7 +10,7 @@ def recommend_hotels(df, address, price_range, min_score):
     """
     try:
         df['price'] = df['price'].apply(lambda x: ''.join(filter(str.isdigit, str(x)))).astype(int)
-        df['score'] = df['score'].str.extract('(\d+)').astype(float)
+        df['score'] = df['score'].str.extract(r'(\d+)').astype(float)  # Sửa cảnh báo với raw string
         df['address'] = df['address'].str.strip().str.lower().apply(unidecode)
         address = unidecode(address.strip().lower())
 
@@ -59,15 +59,17 @@ def display_hotel_card(row):
     """, unsafe_allow_html=True)
 
 
+def reset_signedout():
+    st.session_state['signedout'] = False
+
+
 def main():
     # Kiểm tra trạng thái đăng nhập
     if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
         st.warning("Vui lòng đăng nhập để truy cập trang này.")
-        # Có thể thêm một nút để chuyển người dùng đến trang đăng nhập, tránh gọi rerun
-        st.button("Quay lại đăng nhập", on_click=lambda: st.session_state['signedout'] = False)
+        # Thay đổi lambda thành hàm thực hiện gán giá trị
+        st.button("Quay lại đăng nhập", on_click=reset_signedout)
         return  # Dừng hàm lại thay vì rerun
-
-
 
     # Load dữ liệu khách sạn
     try:
