@@ -65,23 +65,15 @@ def display_hotel_card(row):
     """, unsafe_allow_html=True)
 
 
-def reset_to_login():
-    """
-    Đặt lại trạng thái đăng nhập và chuyển người dùng về trang login.
-    """
-    st.session_state['user_logged_in'] = False
-    st.session_state['username'] = None  # Xóa tên người dùng khi đăng xuất
-    st.experimental_rerun()  # Tải lại trang để chuyển hướng về trang login
+def reset_signedout():
+    st.session_state['signedout'] = False
 
 
 def main():
     # Kiểm tra trạng thái đăng nhập
     if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
         st.warning("Vui lòng đăng nhập để truy cập trang này.")
-        
-        # Tạo nút để quay lại trang đăng nhập
-        if st.button("Quay lại đăng nhập"):
-            reset_to_login()  # Đặt lại trạng thái đăng nhập và quay về trang login
+        st.button("Quay lại đăng nhập", on_click=reset_signedout)
         return  # Dừng hàm lại nếu người dùng chưa đăng nhập
 
     # Hiển thị tên người dùng sau khi đăng nhập
