@@ -9,12 +9,16 @@ def recommend_hotels(df, address, price_range, min_score):
     Lọc khách sạn theo địa chỉ, giá, và điểm đánh giá.
     """
     try:
+        # Chuyển đổi giá và điểm số để dễ dàng xử lý
         df['price'] = df['price'].apply(lambda x: ''.join(filter(str.isdigit, str(x)))).astype(int)
-        df['score'] = df['score'].str.extract(r'(\d+)').astype(float)  # Sửa cảnh báo với raw string
+        df['score'] = df['score'].str.extract(r'(\d+)').astype(float)  # Xử lý cảnh báo với raw string
         df['address'] = df['address'].str.strip().str.lower().apply(unidecode)
         address = unidecode(address.strip().lower())
 
+        # Lọc theo địa chỉ
         address_filter = df['address'].str.contains(address, na=False)
+        
+        # Lọc theo mức giá
         if price_range == "Nhỏ hơn 500.000 đ/ Đêm":
             price_filter = df['price'] < 500000
         elif price_range == "500-1tr đ/ Đêm":
@@ -22,9 +26,10 @@ def recommend_hotels(df, address, price_range, min_score):
         elif price_range == "Lớn hơn 1tr đ/ Đêm":
             price_filter = df['price'] > 1000000
         else:
-            price_filter = pd.Series([True] * len(df))
+            price_filter = pd.Series([True] * len(df))  # Bao gồm tất cả nếu không có mức giá
         score_filter = df['score'] >= min_score
 
+        # Áp dụng tất cả các bộ lọc
         filtered_df = df[address_filter & price_filter & score_filter]
         recommended_df = (
             filtered_df.sort_values(by=['score', 'price'], ascending=[False, True])
@@ -43,6 +48,7 @@ def display_hotel_card(row):
     formatted_price = f"{row['price']:,}".replace(",", ".")
     image_url = row['image_url'] if 'image_url' in row and pd.notna(row['image_url']) else \
         'https://cf.bstatic.com/xdata/images/hotel/max1024x768/175975039.jpg?k=a6e79350b9425673945744d2315561b0afcd5f9dc5d2021565d2b3d4301e51e8&o=&hp=1'
+
     st.markdown(f"""
         <div style='background-color: rgba(230, 245, 255, 0.9); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 20px;'>
             <h3 style='color: #1E3A8A; text-align: center; margin-bottom: 15px;'>{row['hotel']}</h3>
@@ -67,9 +73,8 @@ def main():
     # Kiểm tra trạng thái đăng nhập
     if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
         st.warning("Vui lòng đăng nhập để truy cập trang này.")
-        # Thay đổi lambda thành hàm thực hiện gán giá trị
         st.button("Quay lại đăng nhập", on_click=reset_signedout)
-        return  # Dừng hàm lại thay vì rerun
+        return  # Dừng hàm lại nếu người dùng chưa đăng nhập
 
     # Hiển thị tên người dùng sau khi đăng nhập
     if 'username' in st.session_state:
