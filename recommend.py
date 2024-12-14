@@ -60,11 +60,13 @@ def display_hotel_card(row):
 
 
 def main():
-   if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
-    st.warning("Vui lòng đăng nhập để truy cập trang này.")
-    # Có thể thêm một nút để chuyển người dùng đến trang đăng nhập, tránh gọi rerun
-    st.button("Quay lại đăng nhập", on_click=lambda: st.session_state['signedout'] = False)
-    return  # Dừng hàm lại thay vì rerun
+    # Kiểm tra trạng thái đăng nhập
+    if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
+        st.warning("Vui lòng đăng nhập để truy cập trang này.")
+        # Có thể thêm một nút để chuyển người dùng đến trang đăng nhập, tránh gọi rerun
+        st.button("Quay lại đăng nhập", on_click=lambda: st.session_state['signedout'] = False)
+        return  # Dừng hàm lại thay vì rerun
+
 
 
     # Load dữ liệu khách sạn
