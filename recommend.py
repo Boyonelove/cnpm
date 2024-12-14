@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from unidecode import unidecode
 import os
-import login  # Thay vì import trực tiếp hàm, nhập toàn bộ module
+import login  # Đảm bảo đã import module login như đã định nghĩa
 
 def recommend_hotels(df, address, price_range, min_score):
     """
@@ -70,6 +70,10 @@ def main():
         # Thay đổi lambda thành hàm thực hiện gán giá trị
         st.button("Quay lại đăng nhập", on_click=reset_signedout)
         return  # Dừng hàm lại thay vì rerun
+
+    # Hiển thị tên người dùng sau khi đăng nhập
+    if 'username' in st.session_state:
+        st.write(f"Chào {st.session_state.username}!")
 
     # Load dữ liệu khách sạn
     try:
