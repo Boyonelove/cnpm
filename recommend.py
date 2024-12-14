@@ -4,6 +4,9 @@ from unidecode import unidecode
 import os
 import login  # Đảm bảo đã import module login như đã định nghĩa
 
+# Cấu hình trang phải đặt đầu tiên
+st.set_page_config(layout="wide")
+
 def recommend_hotels(df, address, price_range, min_score):
     try:
         df['price'] = df['price'].apply(lambda x: ''.join(filter(str.isdigit, str(x)))).astype(int)
@@ -98,8 +101,6 @@ def recommend_page():
         st.experimental_rerun()
 
 def main():
-    st.set_page_config(layout="wide")
-
     if 'user_logged_in' not in st.session_state:
         st.session_state['user_logged_in'] = False
     if 'current_page' not in st.session_state:
