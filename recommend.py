@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
 from unidecode import unidecode
-from login import sign_in_with_email_and_password  # Kết nối với file login.py
 import os
+import login  # Thay vì import trực tiếp hàm, nhập toàn bộ module
 
 def recommend_hotels(df, address, price_range, min_score):
     """
