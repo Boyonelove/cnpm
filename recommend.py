@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from unidecode import unidecode
 import os
-import login  # Đảm bảo đã import module login như đã định nghĩa
+
 
 def recommend_hotels(df, address, price_range, min_score):
     """
@@ -65,21 +65,7 @@ def display_hotel_card(row):
     """, unsafe_allow_html=True)
 
 
-def reset_signedout():
-    st.session_state['signedout'] = False
-
-
 def main():
-    # Kiểm tra trạng thái đăng nhập
-    if 'user_logged_in' not in st.session_state or not st.session_state['user_logged_in']:
-        st.warning("Vui lòng đăng nhập để truy cập trang này.")
-        st.button("Quay lại đăng nhập", on_click=reset_signedout)
-        return  # Dừng hàm lại nếu người dùng chưa đăng nhập
-
-    # Hiển thị tên người dùng sau khi đăng nhập
-    if 'username' in st.session_state:
-        st.write(f"Chào {st.session_state.username}!")
-
     # Load dữ liệu khách sạn
     try:
         if not os.path.exists('hotels_list.csv'):
