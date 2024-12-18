@@ -3,7 +3,6 @@ import streamlit as st
 from unidecode import unidecode
 import os
 
-
 def recommend_hotels(df, address, price_range, min_score):
     """
     Lọc khách sạn theo địa chỉ, giá, và điểm đánh giá.
@@ -40,7 +39,6 @@ def recommend_hotels(df, address, price_range, min_score):
         st.error(f"Lỗi xử lý dữ liệu: {e}")
         return pd.DataFrame()
 
-
 def display_hotel_card(row):
     """
     Hiển thị giao diện đẹp cho từng khách sạn.
@@ -64,40 +62,44 @@ def display_hotel_card(row):
         </div>
     """, unsafe_allow_html=True)
 
-
 def main():
-    # Load dữ liệu khách sạn
-    try:
-        if not os.path.exists('hotels_list.csv'):
-            st.error("Tệp dữ liệu khách sạn không tồn tại.")
+    # Kiểm tra trạng thái đăng nhập
+    if "signed_in" in st.session_state and st.session_state.signed_in:
+        # Load dữ liệu khách sạn
+        try:
+            if not os.path.exists('hotels_list.csv'):
+                st.error("Tệp dữ liệu khách sạn không tồn tại.")
+                return
+            df = pd.read_csv('hotels_list.csv')
+        except Exception as e:
+            st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
             return
-        df = pd.read_csv('hotels_list.csv')
-    except Exception as e:
-        st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
-        return
 
-    # Giao diện chính
-    st.title("Khách sạn được đề xuất")
-    st.write("Tìm kiếm khách sạn phù hợp với bạn.")
+        # Giao diện chính
+        st.title("Khách sạn được đề xuất")
+        st.write("Tìm kiếm khách sạn phù hợp với bạn.")
 
-    # Bộ lọc tìm kiếm
-    st.sidebar.header("Bộ lọc tìm kiếm")
-    with st.sidebar.form(key='search_form'):
-        address = st.text_input("Nhập địa điểm:", "")
-        price_range = st.selectbox("Chọn mức giá:", ["Mọi mức giá", "Nhỏ hơn 500.000 đ/ Đêm", "500-1tr đ/ Đêm", "Lớn hơn 1tr đ/ Đêm"])
-        min_score = st.slider("Điểm đánh giá tối thiểu (thang điểm 10):", min_value=1, max_value=10, value=5)
-        submit_button = st.form_submit_button("Tìm kiếm")
+        # Bộ lọc tìm kiếm
+        st.sidebar.header("Bộ lọc tìm kiếm")
+        with st.sidebar.form(key='search_form'):
+            address = st.text_input("Nhập địa điểm:", "")
+            price_range = st.selectbox("Chọn mức giá:", ["Mọi mức giá", "Nhỏ hơn 500.000 đ/ Đêm", "500-1tr đ/ Đêm", "Lớn hơn 1tr đ/ Đêm"])
+            min_score = st.slider("Điểm đánh giá tối thiểu (thang điểm 10):", min_value=1, max_value=10, value=5)
+            submit_button = st.form_submit_button("Tìm kiếm")
 
-    if submit_button:
-        recommended_hotels_df = recommend_hotels(df, address, price_range, min_score)
-        if not recommended_hotels_df.empty:
-            for _, row in recommended_hotels_df.iterrows():
-                display_hotel_card(row)
+        if submit_button:
+            recommended_hotels_df = recommend_hotels(df, address, price_range, min_score)
+            if not recommended_hotels_df.empty:
+                for _, row in recommended_hotels_df.iterrows():
+                    display_hotel_card(row)
+            else:
+                st.write("Không có khách sạn nào phù hợp với tiêu chí của bạn.")
         else:
-            st.write("Không có khách sạn nào phù hợp với tiêu chí của bạn.")
-    else:
-        st.write("Vui lòng sử dụng bộ lọc để tìm kiếm khách sạn phù hợp.")
+            st.write("Vui lòng sử dụng bộ lọc để tìm kiếm khách sạn phù hợp.")
 
+    else:
+        st.warning("Vui lòng đăng nhập để xem trang này!")
+        st.button("Quay lại trang đăng nhập", on_click=lambda: st.session_state.update({"signed_in": False}))
 
 if __name__ == "__main__":
     main()
