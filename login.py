@@ -33,7 +33,7 @@ def main():
             }
             if username:
                 payload["displayName"] = username
-            r = requests.post(url, params={"key": "API_KEY"}, json=payload)
+            r = requests.post(url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
             response = r.json()
             if 'error' in response:
                 st.warning(f"Lỗi đăng ký: {response['error']['message']}")
@@ -51,7 +51,7 @@ def main():
                 "password": password,
                 "returnSecureToken": True
             }
-            r = requests.post(url, params={"key": "API_KEY"}, json=payload)
+            r = requests.post(url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
             response = r.json()
             if 'error' in response:
                 st.warning(f"Lỗi đăng nhập: {response['error']['message']}")
