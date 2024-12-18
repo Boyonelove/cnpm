@@ -24,4 +24,10 @@ def main():
         st.write("- **Chính sách hoàn tiền:** [Xem chi tiết](https://example.com/policy)")
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
-        st.button("Quay lại trang đăng nhập", on_click=lambda: st.experimental_rerun())
+        
+        # Điều chỉnh lại nút "Quay lại trang đăng nhập"
+        if st.button("Quay lại trang đăng nhập"):
+            # Thay đổi trạng thái để quay lại trang login
+            st.session_state.signed_in = False
+            st.experimental_set_query_params(page="login")  # Nếu sử dụng query parameters
+            st.stop()  # Kết thúc luồng xử lý hiện tại để tránh lỗi
