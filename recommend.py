@@ -3,6 +3,7 @@ import streamlit as st
 from unidecode import unidecode
 import os
 
+
 def recommend_hotels(df, address, price_range, min_score):
     """
     Lọc khách sạn theo địa chỉ, giá, và điểm đánh giá.
@@ -18,7 +19,7 @@ def recommend_hotels(df, address, price_range, min_score):
         # Hàm xử lý giá trị trong cột điểm số
         def clean_score(value):
             try:
-                return float(value)
+                return float(str(value).split("(")[0].strip())  # Loại bỏ ký tự không cần thiết
             except ValueError:
                 return 0.0  # Giá trị mặc định nếu không chuyển đổi được
 
@@ -56,14 +57,12 @@ def recommend_hotels(df, address, price_range, min_score):
         return pd.DataFrame()
 
 
-
-
 def display_hotel_card(row):
     """
     Hiển thị giao diện đẹp cho từng khách sạn.
     """
     formatted_price = f"{row['price']:,}".replace(",", ".")
-    image_url = row['image_url'] if 'image_url' in row and pd.notna(row['image_url']) else \
+    image_url = row['image_url'] if pd.notna(row['image_url']) else \
         'https://cf.bstatic.com/xdata/images/hotel/max1024x768/175975039.jpg?k=a6e79350b9425673945744d2315561b0afcd5f9dc5d2021565d2b3d4301e51e8&o=&hp=1'
 
     st.markdown(f"""
@@ -82,13 +81,12 @@ def display_hotel_card(row):
         </div>
     """, unsafe_allow_html=True)
 
+
 def main():
-    # Kiểm tra trạng thái đăng nhập
     if "signed_in" not in st.session_state:
         st.session_state.signed_in = False
 
     if st.session_state.signed_in:
-        # Load dữ liệu khách sạn
         try:
             if not os.path.exists('processed_data.csv'):
                 st.error("Tệp dữ liệu khách sạn không tồn tại.")
@@ -98,11 +96,7 @@ def main():
             st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
             return
 
-        # Giao diện chính
         st.title("Khách sạn được đề xuất")
-        st.write("Tìm kiếm khách sạn phù hợp với bạn.")
-
-        # Bộ lọc tìm kiếm
         st.sidebar.header("Bộ lọc tìm kiếm")
         with st.sidebar.form(key='search_form'):
             address = st.text_input("Nhập địa điểm:", "")
@@ -128,6 +122,7 @@ def main():
         st.warning("Vui lòng đăng nhập để xem trang này!")
         if st.button("Quay lại trang đăng nhập"):
             st.experimental_set_query_params(page="login")
+
 
 if __name__ == "__main__":
     main()
