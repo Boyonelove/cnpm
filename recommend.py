@@ -96,10 +96,15 @@ def main():
                 st.write("Không có khách sạn nào phù hợp với tiêu chí của bạn.")
         else:
             st.write("Vui lòng sử dụng bộ lọc để tìm kiếm khách sạn phù hợp.")
-        st.button("Logout", on_click=lambda: st.session_state.update({"signed_in": False}))
+
+        if st.button("Logout"):
+            st.session_state.signed_in = False
+            st.experimental_rerun()  # Reload lại web
+
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
-        st.button("Quay lại trang đăng nhập", on_click=lambda: 
+        if st.button("Quay lại trang đăng nhập"):
+            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
