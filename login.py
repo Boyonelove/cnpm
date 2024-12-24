@@ -82,7 +82,7 @@ def main():
 
     # Giao diện
     if not st.session_state.signed_in:
-        choice = st.radio( ["Đăng nhập", "Đăng ký", "Quên mật khẩu"])
+        choice = st.radio("Chọn hành động", ["Đăng nhập", "Đăng ký", "Quên mật khẩu"])
         email = st.text_input("Email")
         password = ""
 
