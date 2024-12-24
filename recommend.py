@@ -8,8 +8,15 @@ def recommend_hotels(df, address, price_range, min_score):
     Lọc khách sạn theo địa chỉ, giá, và điểm đánh giá.
     """
     try:
+        # Hàm xử lý giá trị trong cột giá
+        def convert_price(value):
+            try:
+                return int(''.join(filter(str.isdigit, str(value)))) if value else 0
+            except ValueError:
+                return 0  # Giá trị mặc định nếu không chuyển đổi được
+
         # Chuyển đổi giá và điểm số để dễ dàng xử lý
-        df['price'] = df['price'].apply(lambda x: ''.join(filter(str.isdigit, str(x)))).astype(int)
+        df['price'] = df['price'].apply(convert_price)
         df['score'] = df['score'].astype(float)
         df['address'] = df['address'].str.strip().str.lower().apply(unidecode)
         address = unidecode(address.strip().lower())
@@ -40,6 +47,7 @@ def recommend_hotels(df, address, price_range, min_score):
     except Exception as e:
         st.error(f"Lỗi xử lý dữ liệu: {e}")
         return pd.DataFrame()
+
 
 def display_hotel_card(row):
     """
