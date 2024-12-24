@@ -65,6 +65,12 @@ def display_hotel_card(row):
 def main():
     # Kiểm tra trạng thái đăng nhập
     if "signed_in" in st.session_state and st.session_state.signed_in:
+        # Thêm nút Logout
+        if st.button("Logout"):
+            st.session_state.signed_in = False
+            st.success("Đăng xuất thành công!")
+            st.experimental_rerun()  # Làm mới ứng dụng để quay lại trang đăng nhập
+
         # Load dữ liệu khách sạn
         try:
             if not os.path.exists('hotels_list.csv'):
@@ -100,6 +106,30 @@ def main():
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
         st.button("Quay lại trang đăng nhập", on_click=lambda: st.session_state.update({"signed_in": False}))
+
+# Hàm mô phỏng hiển thị thông tin khách sạn
+def display_hotel_card(row):
+    st.write(f"**{row['Hotel Name']}**")
+    st.write(f"Địa chỉ: {row['Address']}")
+    st.write(f"Mức giá: {row['Price']} VND/đêm")
+    st.write(f"Đánh giá: {row['Rating']}")
+
+# Hàm mô phỏng gợi ý khách sạn
+def recommend_hotels(df, address, price_range, min_score):
+    # Giả định lọc khách sạn dựa trên bộ lọc
+    df_filtered = df
+    if address:
+        df_filtered = df_filtered[df_filtered['Address'].str.contains(address, case=False)]
+    if price_range != "Mọi mức giá":
+        if price_range == "Nhỏ hơn 500.000 đ/ Đêm":
+            df_filtered = df_filtered[df_filtered['Price'] < 500000]
+        elif price_range == "500-1tr đ/ Đêm":
+            df_filtered = df_filtered[(df_filtered['Price'] >= 500000) & (df_filtered['Price'] <= 1000000)]
+        elif price_range == "Lớn hơn 1tr đ/ Đêm":
+            df_filtered = df_filtered[df_filtered['Price'] > 1000000]
+    df_filtered = df_filtered[df_filtered['Rating'] >= min_score]
+    
+    return df_filtered
 
 if __name__ == "__main__":
     main()
