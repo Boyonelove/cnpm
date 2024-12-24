@@ -10,9 +10,8 @@ if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_json_path)
     firebase_admin.initialize_app(cred)
 
-
 def main():
-    st.title(":key: Đăng nhập hoặc Đăng ký")
+    st.title(":key: Đăng nhập, Đăng ký hoặc Đặt lại Mật khẩu")
 
     # Quản lý trạng thái
     if 'username' not in st.session_state:
@@ -63,19 +62,45 @@ def main():
         except Exception as e:
             st.error(f"Lỗi đăng nhập: {e}")
 
+    # Hàm đặt lại mật khẩu
+    def reset_password(email):
+        try:
+            rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode"
+            payload = {
+                "email": email,
+                "requestType": "PASSWORD_RESET"
+            }
+            r = requests.post(rest_api_url, params={"key": "AIzaSyCmkJEWJXUyEiVLjGKX-VomOa7wc7wTg_o"}, json=payload)
+            response = r.json()
+            if r.status_code == 200:
+                st.success("Email đặt lại mật khẩu đã được gửi!")
+            else:
+                error_message = response.get('error', {}).get('message', 'Không rõ lỗi')
+                st.warning(f"Lỗi đặt lại mật khẩu: {error_message}")
+        except Exception as e:
+            st.error(f"Lỗi đặt lại mật khẩu: {e}")
+
     # Giao diện
     if not st.session_state.signed_in:
-        choice = st.radio("Chọn hành động", ["Đăng nhập", "Đăng ký"])
+        choice = st.radio("Chọn hành động", ["Đăng nhập", "Đăng ký", "Quên mật khẩu"])
         email = st.text_input("Email")
-        password = st.text_input("Mật khẩu", type="password")
-        
+        password = ""
+
         if choice == "Đăng ký":
             username = st.text_input("Tên người dùng (tuỳ chọn)")
+            password = st.text_input("Mật khẩu", type="password")
             if st.button("Đăng ký"):
                 sign_up(email, password, username)
-        else:
+
+        elif choice == "Đăng nhập":
+            password = st.text_input("Mật khẩu", type="password")
             if st.button("Đăng nhập"):
                 sign_in(email, password)
+
+        elif choice == "Quên mật khẩu":
+            if st.button("Đặt lại mật khẩu"):
+                reset_password(email)
+
     else:
         st.success(f"Đã đăng nhập với email: {st.session_state.useremail}")
         if st.button("Đăng xuất"):
@@ -83,3 +108,6 @@ def main():
             st.session_state.username = ''
             st.session_state.useremail = ''
             st.info("Đã đăng xuất thành công!")
+
+if __name__ == "__main__":
+    main()
