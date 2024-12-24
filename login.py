@@ -11,7 +11,7 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 def main():
-    st.title(":key: Đăng nhập, Đăng ký hoặc Đặt lại Mật khẩu")
+    st.title(":key: Đăng nhập, Đăng ký ")
 
     # Quản lý trạng thái
     if 'username' not in st.session_state:
@@ -82,7 +82,7 @@ def main():
 
     # Giao diện
     if not st.session_state.signed_in:
-        choice = st.radio("Chọn hành động", ["Đăng nhập", "Đăng ký", "Quên mật khẩu"])
+        choice = st.radio( ["Đăng nhập", "Đăng ký", "Quên mật khẩu"])
         email = st.text_input("Email")
         password = ""
 
