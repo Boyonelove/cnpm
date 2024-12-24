@@ -64,7 +64,10 @@ def display_hotel_card(row):
 
 def main():
     # Kiểm tra trạng thái đăng nhập
-    if "signed_in" in st.session_state and st.session_state.signed_in:
+    if "signed_in" not in st.session_state:
+        st.session_state.signed_in = False
+
+    if st.session_state.signed_in:
         # Load dữ liệu khách sạn
         try:
             if not os.path.exists('hotels_list.csv'):
@@ -99,12 +102,14 @@ def main():
 
         if st.button("Logout"):
             st.session_state.signed_in = False
-            st.experimental_rerun()  # Reload lại web
+            # Hiển thị thông báo đăng xuất
+            st.warning("Bạn đã đăng xuất! Quay lại trang đăng nhập.")
 
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
         if st.button("Quay lại trang đăng nhập"):
-            st.experimental_rerun()
+            st.experimental_set_query_params(page="login")  # Điều hướng đến trang khác
+
 
 if __name__ == "__main__":
     main()
