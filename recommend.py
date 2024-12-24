@@ -10,13 +10,13 @@ def recommend_hotels(df, address, price_range, min_score):
     try:
         # Chuyển đổi giá và điểm số để dễ dàng xử lý
         df['price'] = df['price'].apply(lambda x: ''.join(filter(str.isdigit, str(x)))).astype(int)
-        df['score'] = df['score'].str.extract(r'(\d+)').astype(float)  # Xử lý cảnh báo với raw string
+        df['score'] = df['score'].astype(float)
         df['address'] = df['address'].str.strip().str.lower().apply(unidecode)
         address = unidecode(address.strip().lower())
 
         # Lọc theo địa chỉ
         address_filter = df['address'].str.contains(address, na=False)
-        
+
         # Lọc theo mức giá
         if price_range == "Nhỏ hơn 500.000 đ/ Đêm":
             price_filter = df['price'] < 500000
@@ -26,13 +26,15 @@ def recommend_hotels(df, address, price_range, min_score):
             price_filter = df['price'] > 1000000
         else:
             price_filter = pd.Series([True] * len(df))  # Bao gồm tất cả nếu không có mức giá
+
+        # Lọc theo điểm số
         score_filter = df['score'] >= min_score
 
         # Áp dụng tất cả các bộ lọc
         filtered_df = df[address_filter & price_filter & score_filter]
         recommended_df = (
             filtered_df.sort_values(by=['score', 'price'], ascending=[False, True])
-            .drop_duplicates(subset=['hotel'], keep='first')
+            .drop_duplicates(subset=['hotel_name'], keep='first')
         )
         return recommended_df
     except Exception as e:
@@ -49,15 +51,16 @@ def display_hotel_card(row):
 
     st.markdown(f"""
         <div style='background-color: rgba(230, 245, 255, 0.9); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 20px;'>
-            <h3 style='color: #1E3A8A; text-align: center; margin-bottom: 15px;'>{row['hotel']}</h3>
+            <h3 style='color: #1E3A8A; text-align: center; margin-bottom: 15px;'>{row['hotel_name']}</h3>
             <div style='display: flex; justify-content: center; margin-bottom: 15px;'>
                 <img src='{image_url}' style='width: 100%; max-width: 400px; border-radius: 10px;' alt='Hotel Image'>
             </div>
             <p style='color: #1E3A8A;'><b>⭐ Rating:</b> <span style='color: black;'> {row['score']}</span></p>
             <p style='color: #1E3A8A;'><b>🗺️ Địa chỉ:</b> <span style='color: black;'>{row['address']}</span></p>
             <p style='color: #1E3A8A;'><b>💵 Giá:</b> <span style='color: black;'>{formatted_price} VND</span></p>
+            <p style='color: #1E3A8A;'><b>🌊 Tính năng:</b> <span style='color: black;'>{row['feature']}</span></p>
             <div style='text-align: center; margin-top: 20px;'>
-                <a href='{row['url']}' target='_blank' style='text-decoration: none; background-color: #1E3A8A; color: white; padding: 12px 24px; border-radius: 5px; display: inline-block; text-align: center; transition: background-color 0.3s;'>Đặt phòng</a>
+                <a href='{row['booking_url']}' target='_blank' style='text-decoration: none; background-color: #1E3A8A; color: white; padding: 12px 24px; border-radius: 5px; display: inline-block; text-align: center; transition: background-color 0.3s;'>Đặt phòng</a>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -70,10 +73,10 @@ def main():
     if st.session_state.signed_in:
         # Load dữ liệu khách sạn
         try:
-            if not os.path.exists('hotels_list.csv'):
+            if not os.path.exists('processed_data.csv'):
                 st.error("Tệp dữ liệu khách sạn không tồn tại.")
                 return
-            df = pd.read_csv('hotels_list.csv')
+            df = pd.read_csv('processed_data.csv', names=['hotel_name', 'booking_url', 'image_url', 'price', 'address', 'feature', 'score'])
         except Exception as e:
             st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
             return
@@ -102,14 +105,12 @@ def main():
 
         if st.button("Logout"):
             st.session_state.signed_in = False
-            # Hiển thị thông báo đăng xuất
             st.warning("Bạn đã đăng xuất! Quay lại trang đăng nhập.")
 
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
         if st.button("Quay lại trang đăng nhập"):
-            st.experimental_set_query_params(page="login")  # Điều hướng đến trang khác
-
+            st.experimental_set_query_params(page="login")
 
 if __name__ == "__main__":
     main()
