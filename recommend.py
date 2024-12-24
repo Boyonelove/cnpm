@@ -65,6 +65,16 @@ def display_hotel_card(row):
 def main():
     # Kiểm tra trạng thái đăng nhập
     if "signed_in" in st.session_state and st.session_state.signed_in:
+        # Load dữ liệu khách sạn
+        try:
+            if not os.path.exists('hotels_list.csv'):
+                st.error("Tệp dữ liệu khách sạn không tồn tại.")
+                return
+            df = pd.read_csv('hotels_list.csv')
+        except Exception as e:
+            st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
+            return
+
         # Giao diện chính
         st.title("Khách sạn được đề xuất")
         st.write("Tìm kiếm khách sạn phù hợp với bạn.")
@@ -77,57 +87,19 @@ def main():
             min_score = st.slider("Điểm đánh giá tối thiểu (thang điểm 10):", min_value=1, max_value=10, value=5)
             submit_button = st.form_submit_button("Tìm kiếm")
 
-        # Logic tìm kiếm khách sạn
         if submit_button:
-            try:
-                df = pd.read_csv('hotels_list.csv')
-                recommended_hotels_df = recommend_hotels(df, address, price_range, min_score)
-                if not recommended_hotels_df.empty:
-                    for _, row in recommended_hotels_df.iterrows():
-                        display_hotel_card(row)
-                else:
-                    st.write("Không có khách sạn nào phù hợp với tiêu chí của bạn.")
-            except Exception as e:
-                st.error(f"Lỗi khi tải dữ liệu khách sạn: {e}")
+            recommended_hotels_df = recommend_hotels(df, address, price_range, min_score)
+            if not recommended_hotels_df.empty:
+                for _, row in recommended_hotels_df.iterrows():
+                    display_hotel_card(row)
+            else:
+                st.write("Không có khách sạn nào phù hợp với tiêu chí của bạn.")
         else:
             st.write("Vui lòng sử dụng bộ lọc để tìm kiếm khách sạn phù hợp.")
-
-        # Thêm nút logout ở cuối trang
-        st.markdown("---")
-        if st.button("Logout"):
-            st.session_state.signed_in = False
-            st.success("Đăng xuất thành công!")
-            st.experimental_rerun()  # Làm mới ứng dụng để quay lại trang đăng nhập
-
+        st.button("Logout", on_click=lambda: st.session_state.update({"signed_in": False}))
     else:
         st.warning("Vui lòng đăng nhập để xem trang này!")
-        if st.button("Quay lại trang đăng nhập"):
-            st.session_state.signed_in = False
-            st.experimental_rerun()  # Làm mới ứng dụng quay lại trang đăng nhập
-
-# Hàm mô phỏng hiển thị thông tin khách sạn
-def display_hotel_card(row):
-    st.write(f"**{row['Hotel Name']}**")
-    st.write(f"Địa chỉ: {row['Address']}")
-    st.write(f"Mức giá: {row['Price']} VND/đêm")
-    st.write(f"Đánh giá: {row['Rating']}")
-
-# Hàm mô phỏng gợi ý khách sạn
-def recommend_hotels(df, address, price_range, min_score):
-    # Giả định lọc khách sạn dựa trên bộ lọc
-    df_filtered = df
-    if address:
-        df_filtered = df_filtered[df_filtered['Address'].str.contains(address, case=False)]
-    if price_range != "Mọi mức giá":
-        if price_range == "Nhỏ hơn 500.000 đ/ Đêm":
-            df_filtered = df_filtered[df_filtered['Price'] < 500000]
-        elif price_range == "500-1tr đ/ Đêm":
-            df_filtered = df_filtered[(df_filtered['Price'] >= 500000) & (df_filtered['Price'] <= 1000000)]
-        elif price_range == "Lớn hơn 1tr đ/ Đêm":
-            df_filtered = df_filtered[df_filtered['Price'] > 1000000]
-    df_filtered = df_filtered[df_filtered['Rating'] >= min_score]
-    
-    return df_filtered
+        st.button("Quay lại trang đăng nhập", on_click=lambda: 
 
 if __name__ == "__main__":
     main()
