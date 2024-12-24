@@ -15,9 +15,16 @@ def recommend_hotels(df, address, price_range, min_score):
             except ValueError:
                 return 0  # Giá trị mặc định nếu không chuyển đổi được
 
-        # Chuyển đổi giá và điểm số để dễ dàng xử lý
+        # Hàm xử lý giá trị trong cột điểm số
+        def clean_score(value):
+            try:
+                return float(value)
+            except ValueError:
+                return 0.0  # Giá trị mặc định nếu không chuyển đổi được
+
+        # Làm sạch dữ liệu
         df['price'] = df['price'].apply(convert_price)
-        df['score'] = df['score'].astype(float)
+        df['score'] = df['score'].apply(clean_score)
         df['address'] = df['address'].str.strip().str.lower().apply(unidecode)
         address = unidecode(address.strip().lower())
 
@@ -47,6 +54,7 @@ def recommend_hotels(df, address, price_range, min_score):
     except Exception as e:
         st.error(f"Lỗi xử lý dữ liệu: {e}")
         return pd.DataFrame()
+
 
 
 def display_hotel_card(row):
