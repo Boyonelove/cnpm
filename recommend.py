@@ -8,14 +8,6 @@ def recommend_hotels(df, address, price_range, min_score):
     Lọc khách sạn theo địa chỉ, giá, và điểm đánh giá.
     """
     try:
-        # Kiểm tra các cột bắt buộc
-        required_columns = ['hotel_name', 'price', 'score', 'address', 'url_booking', 'url_image']
-        if not all(col in df.columns for col in required_columns):
-            raise ValueError(f"Dữ liệu đầu vào thiếu các cột cần thiết: {required_columns}")
-
-        # Đặt lại chỉ số để tránh lỗi
-        df = df.reset_index(drop=True)
-
         # Hàm xử lý giá trị trong cột giá
         def convert_price(value):
             try:
@@ -62,6 +54,7 @@ def recommend_hotels(df, address, price_range, min_score):
     except Exception as e:
         st.error(f"Lỗi xử lý dữ liệu: {e}")
         return pd.DataFrame()
+
 
 
 
