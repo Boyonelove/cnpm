@@ -29,22 +29,30 @@ def get_data_from_csv():
 def filter_hotels(df, address, price_range, min_score, max_score, property_type, beach_filter):
     # Tạo cột tạm thời không dấu để tìm kiếm
     df['address_temp'] = df['address_hotel'].str.strip().str.lower().apply(unidecode)
-    address = unidecode(address.strip().lower())
+
+    # Tách các từ khóa tìm kiếm
+    keywords = [unidecode(word.strip().lower()) for word in address.split(",")]
+
+    # Bộ lọc địa chỉ: kiểm tra nếu bất kỳ từ khóa nào có trong địa chỉ
+    address_filter = df['address_temp'].apply(
+        lambda x: any(keyword in x for keyword in keywords)
+    )
 
     # Xử lý điểm đánh giá -1
     df['score'] = df['score'].apply(lambda x: 0 if x == -1 else x)
 
-    # Bộ lọc
-    address_filter = df['address_temp'].str.contains(address, na=False)
+    # Bộ lọc giá
     price_filter = {
         "Mọi mức giá": pd.Series([True] * len(df)),
         "Nhỏ hơn 500.000 đ/ Đêm": df['price'] < 500000,
         "500-1tr đ/ Đêm": (df['price'] >= 500000) & (df['price'] <= 1000000),
         "Lớn hơn 1tr đ/ Đêm": df['price'] > 1000000
     }[price_range]
-    score_filter = (df['score'] >= min_score) & (df['score'] <= max_score)
     
-    # Bộ lọc dựa trên từ khóa trong tên khách sạn
+    # Bộ lọc điểm đánh giá
+    score_filter = (df['score'] >= min_score) & (df['score'] <= max_score)
+
+    # Bộ lọc loại hình khách sạn
     property_filter = df['hotel'].str.contains(property_type, case=False, na=False) if property_type else pd.Series([True] * len(df))
     
     # Bộ lọc bãi biển
@@ -66,8 +74,6 @@ def filter_hotels(df, address, price_range, min_score, max_score, property_type,
 
     # Sắp xếp theo điểm đánh giá và giá tiền từ cao xuống thấp
     return filtered_df.sort_values(by=['score', 'price'], ascending=[False, False])
-
-
 
 
 # Hiển thị thông tin khách sạn
