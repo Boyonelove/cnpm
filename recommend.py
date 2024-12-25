@@ -59,7 +59,7 @@ def filter_hotels(df, address, price_range, min_score, max_score, property_type,
     if beach_filter.lower() == "có":
         beach_filter = df['beach'].str.contains("giáp biển|cách bãi biển", case=False, na=False)
     elif beach_filter.lower() == "không":
-        beach_filter = ~df['beach'].str.contains("giáp biển|cách bãi biển", case=False, na=False)
+        beach_filter = df['beach'].isna() | (df['beach'].str.strip() == "")
     else:  # Nếu không quan tâm, áp dụng tất cả
         beach_filter = pd.Series([True] * len(df))
 
