@@ -107,7 +107,7 @@ def display_hotel_card(row):
                 <p style='color: #1E3A8A; font-size: 17px; margin-bottom: 15px;'><b>🗺️ Địa chỉ:</b> {row['address_hotel']}</p>
                 <p style='color: #1E3A8A; font-size: 17px; margin-bottom: 15px;'><b>💵 Giá:</b> {formatted_price} VND / đêm</p>
                 <p style='color: #1E3A8A; font-size: 17px; margin-bottom: 15px;'><b>📝 Đánh giá trung bình:</b> {avg_review_display}</p>
-                <p style='color: #1E3A8A; font-size: 17px; margin-bottom: 15px;'><b>🏖️ Gần bãi biển:</b> {row['beach'] if row['beach'].strip() else "Không"}</p>
+                <p style='color: #1E3A8A; font-size: 17px; margin-bottom: 15px;'><b>🏖️ Gần bãi biển:</b> {row['beach'] if pd.notna(row['beach']) else "Không"}</p>
             </div>
         </div>
         <!-- Nút đặt phòng ở dưới -->
